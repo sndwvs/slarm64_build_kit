@@ -65,20 +65,9 @@ fix_default() {
     for pf in $(find ${WORK_DIR}/ -maxdepth 1 -type f | grep .SlackBuild);do
         pf=$(basename "$pf")
         echo "$pf"
-        sed -n '/^if \[ \"$ARCH\" = \"\(i.86\)\" \]/{:a;N;/fi$/!ba;N;s/.*\n/case \"\$ARCH\" in\
-     i?86\) SLKCFLAGS=\"-O2 -march=i586 -mtune=i686\"\
-           LIBDIRSUFFIX=\"\"\
-           ;;\
-   x86_64\) SLKCFLAGS=\"-O2 -fPIC\"\
-           LIBDIRSUFFIX=\"64\"\
-           ;;\
-  aarch64\) SLKCFLAGS=\"-O2\"\
-           LIBDIRSUFFIX=\"64\"\
-           ;;\
-        \*\) SLKCFLAGS=\"-O2\"\
-           LIBDIRSUFFIX=\"\"\
-           ;;\
-esac\n/};p' -i "${WORK_DIR}/${pf}"
+        sed '0,/^elif \[ "$ARCH" = "\(x86_64\|arm.*\)" \].*$/s/^elif \[ "$ARCH" = "\(x86_64\|arm.*\)" \].*$/elif \[ \"\$ARCH\" = \"aarch64\" \]; then\
+  SLKCFLAGS=\"-O2\"\
+  LIBDIRSUFFIX=\"64\"\n&/g' -i "${WORK_DIR}/${pf}"
     done
 }
 
