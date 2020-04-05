@@ -93,6 +93,16 @@ patching_files() {
     eval "$1=\$count"
 }
 
+#----------------------------
+# get package - time modified
+#----------------------------
+get_package() {
+    local TYPE="$1"
+    local PKG="$2"
+#    echo $(ls ${PACKAGES_PATH}/${TYPE}/${PKG}-*.txz | sort -Vr | head -n1)
+    echo $(ls -t ${PACKAGES_PATH}/${TYPE}/${PKG}-*.txz | head -n1)
+}
+
 move_pkg() {
     [[ -z "$1" ]] && exit 1
     [[ ! -d "${PACKAGES_PATH}/$1" ]] && ( mkdir -p "${PACKAGES_PATH}/$1" || return 1 )
@@ -166,7 +176,7 @@ build() {
             prepare_work_dir "${_PKG}"
             pushd ${SLARM64_SOURCE_PATH}/${_PKG} 2>&1>/dev/null
 
-            PKG_SOURCE=$(echo ${WORK_DIR}/${p}-*.tar.?z)
+            PKG_SOURCE=$(echo ${WORK_DIR}/${p}-*.tar.?z*)
             PKG_VERSION=$(echo $PKG_SOURCE | rev | cut -f 3- -d . | cut -f 1 -d - | rev)
 
             [[ -e ${SLARM64_SOURCE_PATH}/${_PKG}/.rules ]] && source ${SLARM64_SOURCE_PATH}/${_PKG}/.rules
@@ -195,7 +205,7 @@ build() {
             popd 2>&1>/dev/null
             [[ ${t} == "extra" ]] && t="${t}/${p}"
             move_pkg ${t} ${p}
-            upgradepkg --install-new --reinstall ${PACKAGES_PATH}/${t}/${p}-*.txz
+            upgradepkg --install-new --reinstall $(get_package ${t} ${p})
             popd 2>&1>/dev/null
         fi
     done
