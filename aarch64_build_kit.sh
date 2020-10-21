@@ -57,8 +57,11 @@ prepare_work_dir() {
             ln -s "${SLACKWARE_SOURCE_PATH}/$1/$f" "${SLARM64_SOURCE_PATH}/$1/${WORK_DIR}/$(basename $f)"
         fi
     done
-    [[ $(ls ${SLARM64_SOURCE_PATH}/$1/ | grep .xz) ]] && cp -a ${SLARM64_SOURCE_PATH}/$1/*.xz \
-                                                  ${SLARM64_SOURCE_PATH}/$1/${WORK_DIR}/
+
+    # if there are more files than just a patch: kde, x11
+    pushd ${SLARM64_SOURCE_PATH}/$1/ 2>&1>/dev/null
+    cp -a $(ls | grep -vP '^work$') ${SLARM64_SOURCE_PATH}/$1/${WORK_DIR}/
+    popd 2>&1>/dev/null
 }
 
 fix_default() {
