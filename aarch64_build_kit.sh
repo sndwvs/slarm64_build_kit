@@ -45,7 +45,10 @@ prepare_work_dir() {
     # if new packages copy all
     if [[ -e ${SLARM64_SOURCE_PATH}/$1/.new ]]; then
         pushd ${SLARM64_SOURCE_PATH}/$1/ 2>&1>/dev/null
-        cp -a $(ls | grep -vP '^work$') ${SLARM64_SOURCE_PATH}/$1/${WORK_DIR}/
+        for _file in $(ls | grep -vP '^work$');do
+            echo "copy: " ${_file}
+            cp -a "${_file}" ${SLARM64_SOURCE_PATH}/$1/${WORK_DIR}/ 2>&1>/dev/null
+        done
         popd 2>&1>/dev/null
         return 1
     fi
@@ -60,7 +63,10 @@ prepare_work_dir() {
 
     # if there are more files than just a patch: kde, x11
     pushd ${SLARM64_SOURCE_PATH}/$1/ 2>&1>/dev/null
-    cp -a $(ls | grep -vP '^work$') ${SLARM64_SOURCE_PATH}/$1/${WORK_DIR}/
+    for _file in $(ls | grep -vP '^work$');do
+        echo "copy: " ${_file}
+        cp -a "${_file}" ${SLARM64_SOURCE_PATH}/$1/${WORK_DIR}/ 2>&1>/dev/null
+    done
     popd 2>&1>/dev/null
 }
 
