@@ -27,6 +27,10 @@ environment() {
 #        export PACKAGES_PATH="${SLARM64_PATH}/${TYPE}/${PACKAGE}"
         export PACKAGES_PATH="${SLARM64_PATH}"
         export SLARM64_SOURCE_PATH="${SLARM64_PATH}/${TYPE}/${PREFIX_SOURCE}"
+    elif [[ ${TYPE} == "testing" ]]; then
+        export SLACKWARE_SOURCE_PATH="${SLACKWARE_PATH}/${TYPE}/${PREFIX_SOURCE}"
+        export PACKAGES_PATH="${SLARM64_PATH}/${TYPE}/packages/${PACKAGE}"
+        export SLARM64_SOURCE_PATH="${SLARM64_PATH}/${TYPE}/${PREFIX_SOURCE}"
     else
         export SLACKWARE_SOURCE_PATH="${SLACKWARE_PATH}/${PREFIX_SOURCE}"
         export PACKAGES_PATH="${SLARM64_PATH}/${DISTR}"
@@ -40,7 +44,7 @@ remove_work_dir() {
 
 prepare_work_dir() {
     [[ -z "$1" ]] && return 1
-    [[ ! -d "${SLARM64_SOURCE_PATH}/$1/${WORK_DIR}" ]] && mkdir "${SLARM64_SOURCE_PATH}/$1/${WORK_DIR}"
+    [[ ! -d "${SLARM64_SOURCE_PATH}/$1/${WORK_DIR}" ]] && mkdir -p "${SLARM64_SOURCE_PATH}/$1/${WORK_DIR}"
 
     # if new packages copy all
     if [[ -e ${SLARM64_SOURCE_PATH}/$1/.new ]]; then
@@ -153,7 +157,10 @@ build() {
             environment "$t" "$p"
 
             # build extra series
-            [[ ${t} == "extra" ]] && _PKG=${_PKG/$t\///}
+            [[ ${t} == "extra" ]] && _PKG=${_PKG/$t\//}
+
+            # build testing series
+            [[ ${t} == "testing" ]] && _PKG=${_PKG/$t\//} && p=${_PKG##*/}
 
             # build kernel series
             if [[ $t == k && -e ${SLARM64_SOURCE_PATH}/$t/.rules ]]; then
@@ -207,12 +214,13 @@ build() {
             [[ ${ERROR} == 1 ]] && fix_global ${p}
             [[ ${ERROR} == 1 ]] && ./${p}.SlackBuild 2>&1 | tee ${p}.build.log
             if [[ ${PIPESTATUS[0]} == 1 && ${ERROR} == 1 ]]; then
-                [[ ${t} == "extra" ]] && _PKG="${t}${_PKG}"
+                [[ ${t} =~ (^extra$)|(^testing$) ]] && _PKG="${t}/${_PKG}"
                 echo "${_PKG}" 2>&1 >> ${BCWD}/build_error.log
                 continue
             fi
             popd 2>&1>/dev/null
             [[ ${t} == "extra" ]] && t="${t}/${p}"
+            [[ ${t} == "testing" ]] && t=$(echo ${_PKG} | cut -d '/' -f2)
             move_pkg ${t} ${p}
             upgradepkg --install-new --reinstall $(get_package ${t} ${p})
             popd 2>&1>/dev/null
