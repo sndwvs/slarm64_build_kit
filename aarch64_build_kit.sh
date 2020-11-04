@@ -160,7 +160,17 @@ build() {
             [[ ${t} == "extra" ]] && _PKG=${_PKG/$t\//}
 
             # build testing series
-            [[ ${t} == "testing" ]] && _PKG=${_PKG/$t\//} && p=${_PKG##*/}
+            if [[ ${t} == "testing" ]]; then
+                # build kde series
+                _t=$(echo ${_PKG} | cut -d '/' -f2- | rev | cut -d '/' -f2- | rev)
+                if [[ ${_t} =~ kde && -e ${SLARM64_SOURCE_PATH}/${_t}/.rules ]]; then
+                    t=${_t}
+                    p=${_PKG##*/}
+                    source ${SLARM64_SOURCE_PATH}/$t/.rules
+                    continue
+                fi
+                _PKG=${_PKG/$t\//} && p=${_PKG##*/}
+            fi
 
             # build kernel series
             if [[ $t == k && -e ${SLARM64_SOURCE_PATH}/$t/.rules ]]; then
