@@ -179,7 +179,7 @@ build() {
             fi
 
             # build kde series
-            if [[ $t == kde && -e ${SLARM64_SOURCE_PATH}/$t/$t/.rules ]]; then
+            if [[ $t == kde && ! -d ${SLARM64_SOURCE_PATH}/$t/$p && -e ${SLARM64_SOURCE_PATH}/$t/$t/.rules ]]; then
                 source ${SLARM64_SOURCE_PATH}/$t/$t/.rules
                 continue
             fi
