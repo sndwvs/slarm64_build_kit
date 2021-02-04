@@ -1,0 +1,26 @@
+#----------------------------------
+## sample list of package packages
+#
+## build extra packages
+#extra/tigervnc
+#extra/fltk
+## build l/aspell-en and other
+#extra/aspell-word-lists
+#
+## build kernel packages
+#k/kernel-source
+#k/kernel-headers
+#k/kernel-modules
+#k/kernel-generic
+#
+## build testing packages
+#testing/vtown/deps/dotconf
+#testing/vtown/kde/extra-cmake-modules
+#
+## build other packages
+#d/python3
+#ap/vim
+#xap/vim-gvim
+#
+#---------------------------------
+

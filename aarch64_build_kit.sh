@@ -3,9 +3,16 @@
 BCWD=$(pwd)
 THREADS=$(grep -c 'processor' /proc/cpuinfo)
 
+MARCH=$( uname -m )
+
+if [[ $MARCH == aarch64 ]]; then
+    SLARM64_PATH="${BCWD}/slarm64-current"
+elif [[ $MARCH == riscv64 ]]; then
+    SLARM64_PATH="${BCWD}/slarm64-riscv64-current"
+fi
+
 DISTR="slarm64"
 SLACKWARE_PATH="${BCWD}/slackware64-current"
-SLARM64_PATH="${BCWD}/slarm64-current"
 PREFIX_SOURCE=${PREFIX_SOURCE:-"source"}
 BTMP="/tmp"
 WORK_DIR="work"
@@ -79,6 +86,9 @@ fix_default() {
         pf=$(basename "$pf")
         echo "$pf"
         sed '0,/^elif \[ "$ARCH" = "\(x86_64\|arm.*\)" \].*$/s/^elif \[ "$ARCH" = "\(x86_64\|arm.*\)" \].*$/elif \[ \"\$ARCH\" = \"aarch64\" \]; then\
+  SLKCFLAGS=\"-O2\"\
+  LIBDIRSUFFIX=\"64\"\n&/g' -i "${WORK_DIR}/${pf}"
+        sed '0,/^elif \[ "$ARCH" = "\(x86_64\|arm.*\)" \].*$/s/^elif \[ "$ARCH" = "\(x86_64\|arm.*\)" \].*$/elif \[ \"\$ARCH\" = \"riscv64\" \]; then\
   SLKCFLAGS=\"-O2\"\
   LIBDIRSUFFIX=\"64\"\n&/g' -i "${WORK_DIR}/${pf}"
     done
