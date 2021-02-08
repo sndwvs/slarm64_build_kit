@@ -127,16 +127,18 @@ get_package() {
 }
 
 move_pkg() {
-    [[ -z "$1" ]] && exit 1
-    [[ ! -d "${PACKAGES_PATH}/$1" ]] && ( mkdir -p "${PACKAGES_PATH}/$1" || return 1 )
-    if [[ -e "${PACKAGES_PATH}/$1" ]]; then
-        for pkg in $(ls ${BTMP}/$2-*.t?z); do
+    local series="$1"
+    local package="$2"
+    [[ -z "$series" ]] && exit 1
+    [[ ! -d "${PACKAGES_PATH}/$series" ]] && ( mkdir -p "${PACKAGES_PATH}/$series" || return 1 )
+    if [[ -e "${PACKAGES_PATH}/$series" ]]; then
+        for pkg in $(ls ${BTMP}/${package}-*.t?z ${BTMP}/aaa_${package}-*.t?z); do
             if [[ ${pkg} =~ "-solibs-" ]];then
                 local SERIES="a"
                 #[[ ${pkg} =~ "seamonkey-solibs-" ]] && SERIES="l"
                 mv ${pkg} "${PACKAGES_PATH}/${SERIES}/"
             else
-                mv ${pkg} "${PACKAGES_PATH}/$1/"
+                mv ${pkg} "${PACKAGES_PATH}/$series/"
             fi
         done
     fi
