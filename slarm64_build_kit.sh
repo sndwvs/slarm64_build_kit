@@ -86,10 +86,10 @@ fix_default() {
         pf=$(basename "$pf")
         echo "$pf"
         sed '0,/^elif \[ "$ARCH" = "\(x86_64\|arm.*\)" \].*$/s/^elif \[ "$ARCH" = "\(x86_64\|arm.*\)" \].*$/elif \[ \"\$ARCH\" = \"aarch64\" \]; then\
-  SLKCFLAGS=\"-O2\"\
+  SLKCFLAGS=\"-O2 -fPIC\"\
   LIBDIRSUFFIX=\"64\"\n&/g' -i "${WORK_DIR}/${pf}"
         sed '0,/^elif \[ "$ARCH" = "\(x86_64\|arm.*\)" \].*$/s/^elif \[ "$ARCH" = "\(x86_64\|arm.*\)" \].*$/elif \[ \"\$ARCH\" = \"riscv64\" \]; then\
-  SLKCFLAGS=\"-O2\"\
+  SLKCFLAGS=\"-O2 -fPIC\"\
   LIBDIRSUFFIX=\"64\"\n&/g' -i "${WORK_DIR}/${pf}"
     done
 }
