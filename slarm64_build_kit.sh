@@ -126,19 +126,24 @@ get_package() {
     echo $(ls -t ${PACKAGES_PATH}/${TYPE}/${PKG}-*.txz | head -n1)
 }
 
+#----------------------------
+# package transfer
+#----------------------------
 move_pkg() {
     local series="$1"
     local package="$2"
     [[ -z "$series" ]] && exit 1
     [[ ! -d "${PACKAGES_PATH}/$series" ]] && ( mkdir -p "${PACKAGES_PATH}/$series" || return 1 )
     if [[ -e "${PACKAGES_PATH}/$series" ]]; then
-        for pkg in $(ls ${BTMP}/${package}-*.t?z ${BTMP}/aaa_${package}-*.t?z); do
-            if [[ ${pkg} =~ "-solibs-" ]];then
-                local SERIES="a"
-                #[[ ${pkg} =~ "seamonkey-solibs-" ]] && SERIES="l"
-                mv ${pkg} "${PACKAGES_PATH}/${SERIES}/"
-            else
-                mv ${pkg} "${PACKAGES_PATH}/$series/"
+        for pkg in $(ls ${BTMP}/); do
+            if [[ ${pkg} == ${package}-*.t?z || ${pkg} == aaa_${package}-*.t?z ]]; then
+                if [[ ${pkg} =~ "-solibs-" ]];then
+                    local SERIES="a"
+                    #[[ ${pkg} =~ "seamonkey-solibs-" ]] && SERIES="l"
+                    mv ${BTMP}/${pkg} "${PACKAGES_PATH}/${SERIES}/"
+                else
+                    mv ${BTMP}/${pkg} "${PACKAGES_PATH}/$series/"
+                fi
             fi
         done
     fi
