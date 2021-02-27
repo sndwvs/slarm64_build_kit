@@ -57,7 +57,7 @@ prepare_work_dir() {
     if [[ -e ${SLARM64_SOURCE_PATH}/$1/.new ]]; then
         pushd ${SLARM64_SOURCE_PATH}/$1/ 2>&1>/dev/null
         for _file in $(ls | grep -vP '^work$');do
-            echo "copy: " ${_file}
+            echo "# copy:  ${_file}"
             cp -a "${_file}" ${SLARM64_SOURCE_PATH}/$1/${WORK_DIR}/ 2>&1>/dev/null
         done
         popd 2>&1>/dev/null
@@ -75,7 +75,7 @@ prepare_work_dir() {
     # if there are more files than just a patch: kde, x11
     pushd ${SLARM64_SOURCE_PATH}/$1/ 2>&1>/dev/null
     for _file in $(ls | grep -vP '^work$');do
-        echo "copy: " ${_file}
+        echo "# copy:  ${_file}"
         cp -a "${_file}" ${SLARM64_SOURCE_PATH}/$1/${WORK_DIR}/ 2>&1>/dev/null
     done
     popd 2>&1>/dev/null
@@ -140,9 +140,11 @@ move_pkg() {
                 if [[ ${pkg} =~ "-solibs-" ]];then
                     local SERIES="a"
                     #[[ ${pkg} =~ "seamonkey-solibs-" ]] && SERIES="l"
+                    echo "# move:  ${pkg}  ->  ${SERIES}/${pkg}"
                     mv ${BTMP}/${pkg} "${PACKAGES_PATH}/${SERIES}/"
                 else
-                    mv ${BTMP}/${pkg} "${PACKAGES_PATH}/$series/"
+                    echo "# move:  ${pkg}  ->  ${series}/${pkg}"
+                    mv ${BTMP}/${pkg} "${PACKAGES_PATH}/${series}/"
                 fi
             fi
         done
