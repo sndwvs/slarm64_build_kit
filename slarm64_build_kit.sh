@@ -133,18 +133,19 @@ move_pkg() {
     local series="$1"
     local package="$2"
     [[ -z "$series" ]] && exit 1
+    [[ $package =~ "/" ]] && local _PREFIX="${package%%/*}/"
     [[ ! -d "${PACKAGES_PATH}/$series" ]] && ( mkdir -p "${PACKAGES_PATH}/$series" || return 1 )
     if [[ -e "${PACKAGES_PATH}/$series" ]]; then
-        for pkg in $(ls ${BTMP}/); do
-            if [[ ${pkg} == ${package}-*.t?z || ${pkg} == aaa_${package}-*.t?z ]]; then
+        for pkg in $(ls ${BTMP}/${_PREFIX}); do
+            if [[ ${pkg} == ${package##*/}-*.t*z || ${pkg} == aaa_${package##*/}-*.t?z ]]; then
                 if [[ ${pkg} =~ "-solibs-" ]];then
                     local SERIES="a"
                     #[[ ${pkg} =~ "seamonkey-solibs-" ]] && SERIES="l"
-                    echo "# move:  ${pkg}  ->  ${SERIES}/${pkg}"
-                    mv ${BTMP}/${pkg} "${PACKAGES_PATH}/${SERIES}/"
+                    echo "# move:  ${_PREFIX}${pkg}  ->  ${SERIES}/${pkg}"
+                    mv ${BTMP}/${_PREFIX}${pkg} "${PACKAGES_PATH}/${SERIES}/"
                 else
-                    echo "# move:  ${pkg}  ->  ${series}/${pkg}"
-                    mv ${BTMP}/${pkg} "${PACKAGES_PATH}/${series}/"
+                    echo "# move:  ${_PREFIX}${pkg}  ->  ${series}/${pkg}"
+                    mv ${BTMP}/${_PREFIX}${pkg} "${PACKAGES_PATH}/${series}/"
                 fi
             fi
         done
