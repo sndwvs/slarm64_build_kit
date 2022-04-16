@@ -58,6 +58,7 @@ echo "Arch: $MARCH"
 echo "+--------------------------+"
 echo
 
+sleep 5
 
 environment() {
     [[ -z "$1" ]] && return 1
