@@ -228,7 +228,14 @@ build() {
             [[ ${t} == "extra" ]] && _PKG=${_PKG/$t\//}
 
             # build patches series
-            [[ ${t} == "patches" ]] && _PKG=${_PKG/$t\//}
+            if [[ ${t} == "patches" ]]; then 
+                _PKG=${_PKG/$t\//}
+                # vim-gvim
+                if [[ $p == "vim-gvim" && ${SLARM64_SOURCE_PATH}/$p/.rules ]]; then
+                    source ${SLARM64_SOURCE_PATH}/$p/.rules
+                    continue
+                fi
+            fi
 
             # build testing series
             if [[ ${t} == "testing" ]]; then
