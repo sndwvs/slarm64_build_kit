@@ -186,8 +186,9 @@ move_pkg() {
             if [[ ${pkg} == ${package##*/}-*.t*z || ${pkg} == aaa_${package##*/}-*.t?z ]]; then
                 if [[ ${pkg} =~ "-solibs-" ]];then
                     local SERIES="a"
-                    [[ ! -d ${PACKAGES_PATH}/${SERIES} ]] && mkdir -p ${PACKAGES_PATH}/${SERIES}
                     #[[ ${pkg} =~ "seamonkey-solibs-" ]] && SERIES="l"
+                    [[ ${series} =~ "patches" ]] && SERIES=${series}
+                    [[ ! -d ${PACKAGES_PATH}/${SERIES} ]] && mkdir -p ${PACKAGES_PATH}/${SERIES}
                     echo "# move:  ${_PREFIX}${pkg}  ->  ${SERIES}/${pkg}"
                     mv ${BTMP}/${_PREFIX}${pkg} "${PACKAGES_PATH}/${SERIES}/"
                 else
