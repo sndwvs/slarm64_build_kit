@@ -1,21 +1,62 @@
 #!/bin/bash
 
+export LANG=C
+
 BCWD=$(pwd)
 THREADS=$(grep -c 'processor' /proc/cpuinfo)
 
 MARCH=$( uname -m )
 
-if [[ $MARCH == aarch64 ]]; then
-    SLARM64_PATH="${BCWD}/slarm64-current"
-elif [[ $MARCH == riscv64 ]]; then
-    SLARM64_PATH="${BCWD}/slarm64-riscv64-current"
+usage() {
+    echo
+    echo "usage: $(basename $0) [-r 15.0]"
+    echo "       -r      distribution release, default current"
+    echo "       -h      displays this message "
+    echo
+    exit 1
+}
+
+while [ -n "$1" ]; do # while loop starts
+    case "$1" in
+    -r)
+        RELEASE="$2"
+        shift
+        ;;
+    -h) usage
+        ;;
+    --)
+        shift # The double dash makes them parameters
+        break
+        ;;
+     *) usage
+        ;;
+    esac
+    shift
+done
+
+if [[ -z "$RELEASE" ]]; then
+    RELEASE="current"
 fi
 
 DISTR="slarm64"
-SLACKWARE_PATH="${BCWD}/slackware64-current"
+SLACKWARE_PATH="${BCWD}/slackware64-$RELEASE"
 PREFIX_SOURCE=${PREFIX_SOURCE:-"source"}
 BTMP="/tmp"
 WORK_DIR="work"
+
+if [[ $MARCH == aarch64 ]]; then
+    SLARM64_PATH="${BCWD}/slarm64-$RELEASE"
+elif [[ $MARCH == riscv64 ]]; then
+    SLARM64_PATH="${BCWD}/slarm64-riscv64-$RELEASE"
+fi
+
+echo
+echo "+--------------------------+"
+echo "Distribution: $DISTR"
+echo "Release: $RELEASE"
+echo "Arch: $MARCH"
+echo "+--------------------------+"
+echo
 
 
 environment() {
@@ -32,6 +73,10 @@ environment() {
     if [[ ${TYPE} == "extra" ]]; then
         export SLACKWARE_SOURCE_PATH="${SLACKWARE_PATH}/${TYPE}/${PREFIX_SOURCE}"
 #        export PACKAGES_PATH="${SLARM64_PATH}/${TYPE}/${PACKAGE}"
+        export PACKAGES_PATH="${SLARM64_PATH}"
+        export SLARM64_SOURCE_PATH="${SLARM64_PATH}/${TYPE}/${PREFIX_SOURCE}"
+    elif [[ ${TYPE} == "patches" ]]; then
+        export SLACKWARE_SOURCE_PATH="${SLACKWARE_PATH}/${TYPE}/${PREFIX_SOURCE}"
         export PACKAGES_PATH="${SLARM64_PATH}"
         export SLARM64_SOURCE_PATH="${SLARM64_PATH}/${TYPE}/${PREFIX_SOURCE}"
     elif [[ ${TYPE} == "testing" ]]; then
@@ -180,6 +225,9 @@ build() {
             # build extra series
             [[ ${t} == "extra" ]] && _PKG=${_PKG/$t\//}
 
+            # build patches series
+            [[ ${t} == "patches" ]] && _PKG=${_PKG/$t\//}
+
             # build testing series
             if [[ ${t} == "testing" ]]; then
                 # build kde series
@@ -246,12 +294,13 @@ build() {
             [[ ${ERROR} == 1 ]] && fix_global ${p}
             [[ ${ERROR} == 1 ]] && ./${p}.SlackBuild 2>&1 | tee ${p}.build.log
             if [[ ${PIPESTATUS[0]} == 1 && ${ERROR} == 1 ]]; then
-                [[ ${t} =~ (^extra$)|(^testing$) ]] && _PKG="${t}/${_PKG}"
+                [[ ${t} =~ (^extra$)|(^patches$)|(^testing$) ]] && _PKG="${t}/${_PKG}"
                 echo "${_PKG}" 2>&1 >> ${BCWD}/build_error.log
                 continue
             fi
             popd 2>&1>/dev/null
             [[ ${t} == "extra" ]] && t="${t}/${p}"
+            [[ ${t} == "patches" ]] && t="${t}/packages"
             [[ ${t} == "testing" ]] && t=$(echo ${_PKG} | cut -d '/' -f2)
             move_pkg ${t} ${p}
             upgradepkg --install-new --reinstall $(get_package ${t} ${p})
