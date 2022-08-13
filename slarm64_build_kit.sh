@@ -241,7 +241,7 @@ build() {
             if [[ ${t} == "testing" ]]; then
                 # build kde series
                 _t=$(echo ${_PKG} | cut -d '/' -f2- | rev | cut -d '/' -f2- | rev)
-                if [[ ${_t} =~ kde && -e ${SLARM64_SOURCE_PATH}/${_t}/.rules ]]; then
+                if [[ ${_t} =~ kde|linux && -e ${SLARM64_SOURCE_PATH}/${_t}/.rules ]]; then
                     t=${_t}
                     p=${_PKG##*/}
                     source ${SLARM64_SOURCE_PATH}/$t/.rules
