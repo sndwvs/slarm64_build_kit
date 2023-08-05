@@ -76,6 +76,10 @@ environment() {
 #        export PACKAGES_PATH="${SLARM64_PATH}/${TYPE}/${PACKAGE}"
         export PACKAGES_PATH="${SLARM64_PATH}"
         export SLARM64_SOURCE_PATH="${SLARM64_PATH}/${TYPE}/${PREFIX_SOURCE}"
+    elif [[ ${TYPE} == "pasture" ]]; then
+        export SLACKWARE_SOURCE_PATH="${SLACKWARE_PATH}/${TYPE}/${PREFIX_SOURCE}"
+        export PACKAGES_PATH="${SLARM64_PATH}"
+        export SLARM64_SOURCE_PATH="${SLARM64_PATH}/${TYPE}/${PREFIX_SOURCE}"
     elif [[ ${TYPE} == "patches" ]]; then
         export SLACKWARE_SOURCE_PATH="${SLACKWARE_PATH}/${TYPE}/${PREFIX_SOURCE}"
         export PACKAGES_PATH="${SLARM64_PATH}"
@@ -225,10 +229,10 @@ build() {
             environment "$t" "$p"
 
             # build extra series
-            [[ ${t} == "extra" ]] && _PKG=${_PKG/$t\//}
+            [[ ${t} =~ extra|pasture ]] && _PKG=${_PKG/$t\//}
 
             # build patches series
-            if [[ ${t} == "patches" ]]; then 
+            if [[ ${t} == "patches" ]]; then
                 _PKG=${_PKG/$t\//}
                 # vim-gvim
                 if [[ $p == "vim-gvim" && ${SLARM64_SOURCE_PATH}/$p/.rules ]]; then
@@ -303,12 +307,13 @@ build() {
             [[ ${ERROR} == 1 ]] && fix_global ${p}
             [[ ${ERROR} == 1 ]] && ./${p}.SlackBuild 2>&1 | tee ${p}.build.log
             if [[ ${PIPESTATUS[0]} == 1 && ${ERROR} == 1 ]]; then
-                [[ ${t} =~ (^extra$)|(^patches$)|(^testing$) ]] && _PKG="${t}/${_PKG}"
+                [[ ${t} =~ (^extra$)|(^pasture$)|(^patches$)|(^testing$) ]] && _PKG="${t}/${_PKG}"
                 echo "${_PKG}" 2>&1 >> ${BCWD}/build_error.log
                 continue
             fi
             popd 2>&1>/dev/null
             [[ ${t} == "extra" ]] && t="${t}/${p}"
+            [[ ${t} == "pasture" ]] && t="${t}"
             [[ ${t} == "patches" ]] && t="${t}/packages"
             [[ ${t} == "testing" ]] && t=$(echo ${_PKG} | cut -d '/' -f2)
             move_pkg ${t} ${p}
